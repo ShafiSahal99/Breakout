@@ -34,10 +34,23 @@ def weights_init(m):
         m.weight.data.uniform(-w_bound + w_bound)
         m.bias.data.fill_(0)
         
-class ActorCritic(self, num_inputs, action_size):
-    super(ActorCritic, self).__init__()
-    self.conv1 = nn.Conv2d(num_inputs, 32, 3, stride = 2, padding = 1)
-    self.conv2 = nn.Conv2d(32, 32, 3, stride = 2, padding = 1)
-    self.conv3 = nn.Conv2d(32, 32, 3, stride = 2, padding = 1)
-    self.conv4 = nn.Conv2d(32, 32, 3, stride = 2, padding = 1)
-    self.lstm = nn.LSTMCell(32 * 3 * 3, 256)
+class ActorCritic(torch.nn.Module):
+    
+    def __init__(self, num_inputs, action_space):
+        super(ActorCritic, self).__init__()
+        self.conv1 = nn.Conv2d(num_inputs, 32, 3, stride = 2, padding = 1)
+        self.conv2 = nn.Conv2d(32, 32, 3, stride = 2, padding = 1)
+        self.conv3 = nn.Conv2d(32, 32, 3, stride = 2, padding = 1)
+        self.conv4 = nn.Conv2d(32, 32, 3, stride = 2, padding = 1)
+        self.lstm = nn.LSTMCell(32 * 3 * 3, 256)
+        num_outputs = action_space.n
+        self.critic_linear = nn.Linear(256, 1)
+        self.actor_linear = nn.Linear(256, num_outputs)
+        self.apply(weights_init)
+        self.actor_linear.weight.data = normalized_columns_initializer(self.actor_linear.weight.data, 0.01)
+        self.actor_linear.bias.data.fill_(0)
+        self.critic_linear.weight.data = normalized_columns_initializer(self.critic_linear.weight.data, 0.01)
+        self.critic_linear.bias.data.fill_(0)
+        self.lstm.bias_ih.data.fill_(0)
+        self.lstm.bias_hh.data.fill_(0)
+        self.train()
