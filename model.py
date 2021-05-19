@@ -54,3 +54,14 @@ class ActorCritic(torch.nn.Module):
         self.lstm.bias_ih.data.fill_(0)
         self.lstm.bias_hh.data.fill_(0)
         self.train()
+        
+    def forward(self, inputs):
+        inputs, (hx, cx) = inputs
+        x = F.elu(self.conv1(inputs))
+        x = F.elu(self.conv2(x))
+        x = F.elu(self.conv3(x))
+        x = F.elu(self.conv4(x))
+        x = x.view(-1, 32 * 3 * 3)
+        hx, cx = self.lstm(x, (hx, cx))
+        x = hx
+        return self.critic_linear(x), self.actor_linear(x), (hx, cx)
