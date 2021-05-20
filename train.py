@@ -44,7 +44,7 @@ def train(rank, params, shared_model, optimizer):
         entropies = []
         
         for step in range(params.num_steps):
-            values, action_values, (cx, hx) = model(Variable(state.unsqueeze(0)), (hx, cx))
+            value, action_values, (cx, hx) = model(Variable(state.unsqueeze(0)), (hx, cx))
             prob = F.softmax(action_values)
             log_prob = F.log_softmax(action_values)
             entropy = -(log_prob * prob).sum(1)
